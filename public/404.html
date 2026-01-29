@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Not Found</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        .bg-grid {
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, rgba(203,213,225,0.4) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(203,213,225,0.4) 1px, transparent 1px);
+            mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+        }
+        .glass-card { backdrop-filter: blur(12px); }
+    </style>
+</head>
+<body class="min-h-screen antialiased font-sans bg-slate-50 text-slate-900">
+    <div class="fixed inset-0 z-0 bg-grid pointer-events-none"></div>
+
+    <nav class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
+        <div class="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="h-6 w-6 rounded-md bg-gradient-to-tr from-emerald-500 to-sky-500 flex items-center justify-center text-[0.6rem] font-semibold shadow-lg shadow-emerald-500/20">
+                    <span class="text-white">MM</span>
+                </div>
+                <span class="text-sm font-semibold tracking-tight text-slate-900">Memory Match</span>
+            </div>
+            <a href="/" class="text-xs font-medium text-slate-500 hover:text-emerald-600 transition-colors">Home</a>
+        </div>
+    </nav>
+
+    <main class="relative z-10 flex flex-col items-center justify-center w-full px-4" style="min-height: calc(100vh - 57px);">
+        <div class="w-full max-w-md text-center">
+            <div class="glass-card rounded-2xl border border-slate-200 bg-white shadow-xl p-10 space-y-6">
+
+                <div class="inline-flex h-20 w-20 items-center justify-center rounded-full bg-red-50 mx-auto">
+                    <i data-lucide="search-x" class="w-10 h-10 text-red-400"></i>
+                </div>
+
+                <div class="space-y-2">
+                    <h1 class="text-6xl font-bold tracking-tight text-slate-900">404</h1>
+                    <p class="text-lg font-semibold text-slate-700">Tim cai d j the :))</p>
+                    <p class="text-sm text-slate-400">Trang ban tim khong ton tai.</p>
+                </div>
+
+                <a href="/" class="group inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-500 text-white font-semibold text-sm shadow-lg shadow-emerald-500/25 hover:bg-emerald-400 transition-all">
+                    <i data-lucide="arrow-left" class="w-4 h-4 transition-transform group-hover:-translate-x-1"></i>
+                    <span>Ve trang chu</span>
+                </a>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons({ attrs: { 'stroke-width': 1.5 } });
+        });
+    </script>
+</body>
+</html>

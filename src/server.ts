@@ -402,6 +402,11 @@ setInterval(() => {
   }
 }, 1000);
 
+// ─── 404 handler ────────────────────────────────────────────────────────
+app.use((_req: express.Request, res: express.Response) => {
+  res.status(404).sendFile(path.join(__dirname, '..', 'public', '404.html'));
+});
+
 // ─── Start server ────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
