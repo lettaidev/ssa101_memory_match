@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orinproxy - IPv4 Rotating Plan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        /* Background Grid Animation */
+        .bg-grid {
+            background-size: 40px 40px;
+            mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+        }
+        
+        .dark .bg-grid {
+            background-image: linear-gradient(to right, rgba(30, 41, 59, 0.3) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(30, 41, 59, 0.3) 1px, transparent 1px);
+        }
+        
+        .light .bg-grid {
+            background-image: linear-gradient(to right, rgba(203, 213, 225, 0.4) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(203, 213, 225, 0.4) 1px, transparent 1px);
+        }
+
+        /* Smooth Transitions */
+        body, .card-bg, .text-content, button {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Glass Effect */
+        .glass-card {
+            backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="min-h-screen antialiased font-sans selection:bg-emerald-500/30 selection:text-emerald-700 dark:bg-slate-950 dark:text-slate-50 bg-slate-50 text-slate-900 transition-colors duration-300">
+
+    <!-- Background Grid -->
+    <div class="fixed inset-0 z-0 bg-grid pointer-events-none"></div>
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 w-full border-b dark:border-slate-800 border-slate-200 dark:bg-slate-950/80 bg-white/80 backdrop-blur-md">
+        <div class="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="h-6 w-6 rounded-md bg-gradient-to-tr from-emerald-500 to-sky-500 flex items-center justify-center text-[0.6rem] font-semibold tracking-tight shadow-lg shadow-emerald-500/20">
+                    <span class="text-white">OR</span>
+                </div>
+                <span class="text-sm font-semibold tracking-tight dark:text-slate-100 text-slate-900">Orinproxy</span>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <!-- Language Toggle -->
+                <button id="lang-toggle" class="flex items-center gap-1.5 px-2 py-1 rounded-md dark:hover:bg-slate-900 hover:bg-slate-100 transition-colors">
+                    <i data-lucide="languages" class="w-3.5 h-3.5 dark:text-slate-400 text-slate-500"></i>
+                    <span class="text-xs font-medium dark:text-slate-400 text-slate-600 uppercase" id="current-lang">EN</span>
+                </button>
+
+                <!-- Theme Toggle -->
+                <button id="theme-toggle" class="group relative flex items-center justify-center h-8 w-8 rounded-full border dark:border-slate-800 border-slate-200 dark:bg-slate-900 bg-white shadow-sm transition-all hover:border-emerald-500/50">
+                    <i data-lucide="sun" class="absolute w-4 h-4 text-amber-500 scale-0 opacity-0 transition-all dark:scale-100 dark:opacity-100"></i>
+                    <i data-lucide="moon" class="absolute w-4 h-4 text-slate-600 scale-100 opacity-100 transition-all dark:scale-0 dark:opacity-0"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="relative z-10 flex flex-col items-center w-full py-16 px-4">
+        
+        <!-- Product Card Container -->
+        <div class="w-full max-w-lg">
+            
+            <!-- Breadcrumb / Header -->
+            <div class="text-center mb-8 space-y-2">
+                <div class="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-[0.65rem] text-emerald-600 dark:text-emerald-400 font-medium">
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span data-translate="liveStatus">Live Network</span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight dark:text-white text-slate-900" data-translate="title">Proxy IP V4 Rotating</h1>
+                <p class="text-sm dark:text-slate-400 text-slate-500" data-translate="subtitle">High-performance residential infrastructure</p>
+            </div>
+
+            <!-- Main Card -->
+            <div class="glass-card rounded-2xl border dark:border-slate-800 border-slate-200 dark:bg-slate-900/60 bg-white shadow-xl overflow-hidden">
+                
+                <!-- Technical Specs Grid -->
+                <div class="grid grid-cols-2 gap-px dark:bg-slate-800 bg-slate-100 border-b dark:border-slate-800 border-slate-200">
+                    <!-- Protocol -->
+                    <div class="p-4 dark:bg-slate-900/80 bg-white flex flex-col gap-1.5">
+                        <div class="flex items-center gap-2 text-xs font-medium dark:text-slate-400 text-slate-500">
+                            <i data-lucide="globe" class="w-3.5 h-3.5"></i>
+                            <span data-translate="support">Support</span>
+                        </div>
+                        <span class="text-sm font-medium dark:text-slate-200 text-slate-900">HTTP / SOCKS5</span>
+                    </div>
+                    
+                    <!-- Port -->
+                    <div class="p-4 dark:bg-slate-900/80 bg-white flex flex-col gap-1.5">
+                        <div class="flex items-center gap-2 text-xs font-medium dark:text-slate-400 text-slate-500">
+                            <i data-lucide="network" class="w-3.5 h-3.5"></i>
+                            <span data-translate="port">Port</span>
+                        </div>
+                        <span class="text-sm font-medium dark:text-slate-200 text-slate-900">50</span>
+                    </div>
+
+                    <!-- Rotation -->
+                    <div class="p-4 dark:bg-slate-900/80 bg-white flex flex-col gap-1.5">
+                        <div class="flex items-center gap-2 text-xs font-medium dark:text-slate-400 text-slate-500">
+                            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                            <span data-translate="rotation">Rotation Time</span>
+                        </div>
+                        <span class="text-sm font-medium dark:text-slate-200 text-slate-900" data-translate="rotationVal">Min 1 Minute</span>
+                    </div>
+
+                    <!-- Location -->
+                    <div class="p-4 dark:bg-slate-900/80 bg-white flex flex-col gap-1.5">
+                        <div class="flex items-center gap-2 text-xs font-medium dark:text-slate-400 text-slate-500">
+                            <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+                            <span data-translate="geo">Geo Location</span>
+                        </div>
+                        <span class="text-sm font-medium dark:text-slate-200 text-slate-900" data-translate="random">Random Countries</span>
+                    </div>
+                    
+                    <!-- Threads -->
+                    <div class="p-4 dark:bg-slate-900/80 bg-white flex flex-col gap-1.5 col-span-2">
+                         <div class="flex items-center justify-between">
+                             <div class="flex items-center gap-2 text-xs font-medium dark:text-slate-400 text-slate-500">
+                                <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+                                <span data-translate="threads">Threads</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                                <span class="text-[0.65rem] text-emerald-600 dark:text-emerald-400 font-semibold uppercase">Active</span>
+                            </div>
+                        </div>
+                        <span class="text-sm font-medium dark:text-slate-200 text-slate-900" data-translate="unlimited">Unlimited</span>
+                    </div>
+                </div>
+
+                <!-- Plan Selection -->
+                <div class="p-6 flex flex-col gap-5">
+                    
+                    <div class="flex items-center justify-between">
+                         <label class="text-xs font-semibold uppercase tracking-wider dark:text-slate-500 text-slate-400" data-translate="selectPlan">Select Bandwidth</label>
+                         <div class="text-[0.65rem] dark:bg-slate-800 bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-medium" data-translate="duration">30 Days Cycle</div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <!-- Option 1: 5TB -->
+                        <div class="relative group cursor-pointer" onclick="selectPlan('standard')">
+                            <input type="radio" name="plan" id="plan-standard" class="peer sr-only" checked>
+                            <div class="flex items-center justify-between rounded-xl border p-4 transition-all
+                                        dark:bg-slate-900 bg-white
+                                        dark:border-slate-700 border-slate-200
+                                        peer-checked:border-emerald-500 peer-checked:shadow-[0_0_0_1px_rgba(16,185,129,1)]
+                                        peer-checked:bg-emerald-500/5
+                                        hover:border-emerald-500/50">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex h-5 w-5 items-center justify-center rounded-full border dark:border-slate-600 border-slate-300 peer-checked:border-emerald-500 peer-checked:bg-emerald-500">
+                                        <div class="h-2 w-2 rounded-full bg-white opacity-0 peer-checked:opacity-100"></div>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-sm font-semibold dark:text-slate-200 text-slate-900">5TB Traffic</span>
+                                        <span class="text-xs dark:text-slate-500 text-slate-500" data-translate="standardDesc">Perfect for small scaling</span>
+                                    </div>
+                                </div>
+                                <span class="text-sm font-medium dark:text-slate-300 text-slate-700">$25</span>
+                            </div>
+                        </div>
+
+                        <!-- Option 2: Unlimited -->
+                        <div class="relative group cursor-pointer" onclick="selectPlan('unlimited')">
+                            <input type="radio" name="plan" id="plan-unlimited" class="peer sr-only">
+                            <div class="flex items-center justify-between rounded-xl border p-4 transition-all
+                                        dark:bg-slate-900 bg-white
+                                        dark:border-slate-700 border-slate-200
+                                        peer-checked:border-emerald-500 peer-checked:shadow-[0_0_0_1px_rgba(16,185,129,1)]
+                                        peer-checked:bg-emerald-500/5
+                                        hover:border-emerald-500/50">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex h-5 w-5 items-center justify-center rounded-full border dark:border-slate-600 border-slate-300 peer-checked:border-emerald-500 peer-checked:bg-emerald-500">
+                                        <div class="h-2 w-2 rounded-full bg-white opacity-0 peer-checked:opacity-100"></div>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-sm font-semibold dark:text-slate-200 text-slate-900">Unlimited Traffic</span>
+                                            <span class="inline-flex items-center rounded-md bg-emerald-500/10 px-1.5 py-0.5 text-[0.6rem] font-medium text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">PRO</span>
+                                        </div>
+                                        <span class="text-xs dark:text-slate-500 text-slate-500" data-translate="unlimitedDesc">No bandwidth caps</span>
+                                    </div>
+                                </div>
+                                <span class="text-sm font-medium dark:text-slate-300 text-slate-700">$100</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Summary & Action -->
+                    <div class="pt-2">
+                        <div class="h-px w-full dark:bg-slate-800 bg-slate-200 mb-6"></div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex flex-col">
+                                <span class="text-xs dark:text-slate-500 text-slate-500" data-translate="total">Total Payment</span>
+                                <div class="flex items-end gap-1">
+                                    <span class="text-2xl font-bold tracking-tight dark:text-white text-slate-900" id="price-display">$25</span>
+                                    <span class="text-xs dark:text-slate-500 text-slate-500 mb-1" data-translate="perMonth">/ 30 days</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="group w-full h-11 relative overflow-hidden rounded-lg bg-emerald-500 text-white shadow-lg shadow-emerald-500/25 transition-all hover:bg-emerald-400 hover:shadow-emerald-500/40">
+                            <div class="absolute inset-0 flex items-center justify-center gap-2 font-semibold text-sm">
+                                <span data-translate="buyBtn">Purchase Plan</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4 transition-transform group-hover:translate-x-1"></i>
+                            </div>
+                        </button>
+                        <p class="mt-3 text-center text-[0.65rem] dark:text-slate-600 text-slate-400">
+                            <i data-lucide="shield-check" class="inline w-3 h-3 mr-1 align-text-bottom"></i>
+                            <span data-translate="guarantee">Secure checkout protected by Stripe</span>
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // State
+        const state = {
+            lang: 'en',
+            isDark: true,
+            plan: 'standard' // 'standard' or 'unlimited'
+        };
+
+        // Translations
+        const i18n = {
+            en: {
+                liveStatus: 'Live Network',
+                title: 'Proxy IP V4 Rotating',
+                subtitle: 'High-performance residential infrastructure',
+                support: 'Support',
+                port: 'Port',
+                rotation: 'Rotation Time',
+                rotationVal: 'Min 1 Minute',
+                geo: 'Geo Location',
+                random: 'Random Countries',
+                threads: 'Threads',
+                unlimited: 'Unlimited',
+                selectPlan: 'Select Bandwidth',
+                duration: '30 Days Cycle',
+                standardDesc: 'Perfect for small scaling',
+                unlimitedDesc: 'No bandwidth caps',
+                total: 'Total Payment',
+                perMonth: '/ 30 days',
+                buyBtn: 'Purchase Plan',
+                guarantee: 'Secure checkout protected by Stripe'
+            },
+            vn: {
+                liveStatus: 'Mạng lưới hoạt động',
+                title: 'Proxy IP V4 Xoay',
+                subtitle: 'Hạ tầng dân cư hiệu suất cao',
+                support: 'Hỗ trợ',
+                port: 'Cổng',
+                rotation: 'Thời gian xoay',
+                rotationVal: 'Tối thiểu 1 phút',
+                geo: 'Vị trí địa lý',
+                random: 'Ngẫu nhiên quốc gia',
+                threads: 'Luồng',
+                unlimited: 'Không giới hạn',
+                selectPlan: 'Chọn băng thông',
+                duration: 'Chu kỳ 30 ngày',
+                standardDesc: 'Phù hợp quy mô nhỏ',
+                unlimitedDesc: 'Không giới hạn băng thông',
+                total: 'Tổng thanh toán',
+                perMonth: '/ 30 ngày',
+                buyBtn: 'Mua gói ngay',
+                guarantee: 'Thanh toán bảo mật qua Stripe'
+            }
+        };
+
+        // DOM Elements
+        const priceDisplay = document.getElementById('price-display');
+        const langToggle = document.getElementById('lang-toggle');
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const currentLangSpan = document.getElementById('current-lang');
+
+        // Functions
+        function renderText() {
+            const texts = i18n[state.lang];
+            document.querySelectorAll('[data-translate]').forEach(el => {
+                const key = el.getAttribute('data-translate');
+                if (texts[key]) el.textContent = texts[key];
+            });
+            currentLangSpan.textContent = state.lang.toUpperCase();
+        }
+
+        function renderPrice() {
+            const price = state.plan === 'standard' ? 25 : 100;
+            priceDisplay.textContent = `$${price}`;
+        }
+
+        function selectPlan(planType) {
+            state.plan = planType;
+            // Update UI radio visuals manually for standard JS handling
+            document.getElementById('plan-standard').checked = (planType === 'standard');
+            document.getElementById('plan-unlimited').checked = (planType === 'unlimited');
+            renderPrice();
+        }
+
+        // Event Listeners
+        langToggle.addEventListener('click', () => {
+            state.lang = state.lang === 'en' ? 'vn' : 'en';
+            renderText();
+        });
+
+        themeToggle.addEventListener('click', () => {
+            state.isDark = !state.isDark;
+            if (state.isDark) {
+                html.classList.add('dark');
+                html.classList.remove('light');
+            } else {
+                html.classList.remove('dark');
+                html.classList.add('light');
+            }
+        });
+
+        // Initialize Icons & UI
+        document.addEventListener("DOMContentLoaded", () => {
+            lucide.createIcons({ attrs: { "stroke-width": 1.5 } });
+            renderText();
+            renderPrice();
+        });
+
+        // Expose selectPlan to window for onclick attributes
+        window.selectPlan = selectPlan;
+    </script>
+</body>
+</html>

@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Match - English Learning Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .bg-grid {
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, rgba(203, 213, 225, 0.4) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(203, 213, 225, 0.4) 1px, transparent 1px);
+            mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+        }
+        .glass-card { backdrop-filter: blur(12px); }
+        body, .card-bg, .text-content, button {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+        /* Card flip animation */
+        .game-card {
+            perspective: 600px;
+            cursor: pointer;
+        }
+        .game-card .card-inner {
+            transition: transform 0.4s ease;
+            transform-style: preserve-3d;
+            position: relative;
+        }
+        .game-card.flipped .card-inner,
+        .game-card.matched .card-inner {
+            transform: rotateY(180deg);
+        }
+        .game-card .card-front, .game-card .card-back {
+            backface-visibility: hidden;
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.75rem;
+        }
+        .game-card .card-front {
+            z-index: 2;
+        }
+        .game-card .card-back {
+            transform: rotateY(180deg);
+        }
+        .game-card.matched {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        .game-card.matched .card-back {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0) !important;
+            border-color: #10b981 !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen antialiased font-sans selection:bg-emerald-500/30 selection:text-emerald-700 bg-slate-50 text-slate-900">
+
+    <!-- Background Grid -->
+    <div class="fixed inset-0 z-0 bg-grid pointer-events-none"></div>
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
+        <div class="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="h-6 w-6 rounded-md bg-gradient-to-tr from-emerald-500 to-sky-500 flex items-center justify-center text-[0.6rem] font-semibold tracking-tight shadow-lg shadow-emerald-500/20">
+                    <span class="text-white">MM</span>
+                </div>
+                <span class="text-sm font-semibold tracking-tight text-slate-900">Memory Match</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="/scoreboard.html" class="text-xs font-medium text-slate-500 hover:text-emerald-600 transition-colors">Bảng xếp hạng</a>
+            </div>
+        </div>
+    </nav>
+
+    <main id="main-content" class="relative z-10 flex flex-col items-center w-full py-10 px-4">
+
+        <!-- JOIN SCREEN -->
+        <div id="join-screen" class="w-full max-w-lg">
+            <div class="text-center mb-8 space-y-2">
+                <div class="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-[0.65rem] text-emerald-600 font-medium">
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Memory Match Game</span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900">Join the Game</h1>
+                <p class="text-sm text-slate-500">Enter your team name to start playing</p>
+            </div>
+
+            <div class="glass-card rounded-2xl border border-slate-200 bg-white shadow-xl overflow-hidden">
+                <div class="p-6 flex flex-col gap-5">
+                    <div>
+                        <label class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2 block">Team Name</label>
+                        <input id="team-name-input" type="text" maxlength="30" placeholder="Enter team name..."
+                               class="w-full h-11 px-4 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all">
+                    </div>
+                    <button id="join-btn" onclick="joinGame()"
+                            class="group w-full h-11 relative overflow-hidden rounded-lg bg-emerald-500 text-white shadow-lg shadow-emerald-500/25 transition-all hover:bg-emerald-400 hover:shadow-emerald-500/40">
+                        <div class="absolute inset-0 flex items-center justify-center gap-2 font-semibold text-sm">
+                            <span>Join Game</span>
+                            <i data-lucide="arrow-right" class="w-4 h-4 transition-transform group-hover:translate-x-1"></i>
+                        </div>
+                    </button>
+                    <p id="join-error" class="text-center text-xs text-red-500 hidden"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- GAME SCREEN -->
+        <div id="game-screen" class="w-full hidden">
+            <!-- Header info -->
+            <div class="text-center mb-2 space-y-1">
+                <div class="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-[0.65rem] text-emerald-600 font-medium">
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Playing</span>
+                </div>
+                <h1 class="text-2xl font-semibold tracking-tight text-slate-900">Team: <span id="display-team-name"></span></h1>
+            </div>
+
+            <!-- Stats bar -->
+            <div class="glass-card rounded-xl border border-slate-200 bg-white shadow-md overflow-hidden mb-3">
+                <div class="grid grid-cols-3 gap-px bg-slate-100">
+                    <div class="p-2 bg-white flex flex-col gap-0.5 items-center">
+                        <div class="flex items-center gap-1 text-[0.65rem] font-medium text-slate-500">
+                            <i data-lucide="trophy" class="w-3 h-3"></i>
+                            <span>Score</span>
+                        </div>
+                        <span id="display-score" class="text-lg font-bold text-slate-900">0</span>
+                    </div>
+                    <div class="p-2 bg-white flex flex-col gap-0.5 items-center">
+                        <div class="flex items-center gap-1 text-[0.65rem] font-medium text-slate-500">
+                            <i data-lucide="clock" class="w-3 h-3"></i>
+                            <span>Time</span>
+                        </div>
+                        <span id="display-time" class="text-lg font-bold text-slate-900">--</span>
+                    </div>
+                    <div class="p-2 bg-white flex flex-col gap-0.5 items-center">
+                        <div class="flex items-center gap-1 text-[0.65rem] font-medium text-slate-500">
+                            <i data-lucide="check-circle" class="w-3 h-3"></i>
+                            <span>Matches</span>
+                        </div>
+                        <span id="display-matches" class="text-lg font-bold text-slate-900">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game board -->
+            <div id="game-board" class="grid gap-2"></div>
+
+            <!-- Waiting message -->
+            <div id="waiting-msg" class="text-center py-12 hidden">
+                <div class="glass-card rounded-2xl border border-slate-200 bg-white shadow-xl p-8">
+                    <i data-lucide="loader" class="w-8 h-8 text-emerald-500 mx-auto mb-3 animate-spin"></i>
+                    <p class="text-sm font-medium text-slate-600">Waiting for admin to start the game...</p>
+                </div>
+            </div>
+
+            <!-- Game ended -->
+            <div id="ended-msg" class="text-center py-12 hidden">
+                <div class="glass-card rounded-2xl border border-slate-200 bg-white shadow-xl p-8">
+                    <i data-lucide="flag" class="w-8 h-8 text-emerald-500 mx-auto mb-3"></i>
+                    <p class="text-lg font-bold text-slate-900 mb-1">Game Over!</p>
+                    <p class="text-sm text-slate-500">Check the scoreboard for final results.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // ─── State ──────────────────────────────────────────────
+        let teamToken = null;
+        let teamName = '';
+        let board = [];
+        let socket = null;
+
+        // ─── Join ───────────────────────────────────────────────
+        async function joinGame() {
+            const input = document.getElementById('team-name-input');
+            const name = input.value.trim();
+            if (!name) return;
+
+            const errEl = document.getElementById('join-error');
+            errEl.classList.add('hidden');
+
+            try {
+                const resp = await fetch('/api/join', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ teamName: name }),
+                });
+                const data = await resp.json();
+                if (data.error) {
+                    errEl.textContent = data.error;
+                    errEl.classList.remove('hidden');
+                    return;
+                }
+
+                teamToken = data.teamToken;
+                teamName = data.teamName;
+                board = data.board;
+
+                // Lưu vào sessionStorage để refresh không mất
+                sessionStorage.setItem('teamToken', teamToken);
+                sessionStorage.setItem('teamName', teamName);
+
+                showGameScreen(data);
+            } catch (e) {
+                errEl.textContent = 'Connection error';
+                errEl.classList.remove('hidden');
+            }
+        }
+
+        // Enter key to join
+        document.getElementById('team-name-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') joinGame();
+        });
+
+        // ─── Auto-rejoin ────────────────────────────────────────
+        (function autoRejoin() {
+            const savedToken = sessionStorage.getItem('teamToken');
+            const savedName = sessionStorage.getItem('teamName');
+            if (savedToken && savedName) {
+                teamToken = savedToken;
+                teamName = savedName;
+                connectSocket();
+            }
+        })();
+
+        // ─── Show game ─────────────────────────────────────────
+        function showGameScreen(data) {
+            document.getElementById('join-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            // Thu nhỏ padding để board chiếm nhiều màn hình hơn
+            const main = document.getElementById('main-content');
+            main.classList.remove('py-10', 'px-4');
+            main.classList.add('py-3', 'px-3');
+            document.getElementById('display-team-name').textContent = teamName;
+            document.getElementById('display-score').textContent = data.score;
+
+            board = data.board;
+
+            if (data.gameActive) {
+                document.getElementById('waiting-msg').classList.add('hidden');
+                document.getElementById('ended-msg').classList.add('hidden');
+                document.getElementById('game-board').classList.remove('hidden');
+                renderBoard();
+            } else if (data.remainingTime <= 0 && data.score > 0) {
+                // Game ended
+                document.getElementById('game-board').classList.add('hidden');
+                document.getElementById('waiting-msg').classList.add('hidden');
+                document.getElementById('ended-msg').classList.remove('hidden');
+            } else {
+                document.getElementById('game-board').classList.add('hidden');
+                document.getElementById('waiting-msg').classList.remove('hidden');
+                document.getElementById('ended-msg').classList.add('hidden');
+            }
+
+            connectSocket();
+        }
+
+        // ─── Render board ───────────────────────────────────────
+        function renderBoard() {
+            const container = document.getElementById('game-board');
+            container.innerHTML = '';
+
+            const totalCards = board.length;
+            if (totalCards === 0) return;
+
+            // Tính layout tối ưu: fill toàn bộ viewport
+            const boardRect = container.getBoundingClientRect();
+            const availH = window.innerHeight - boardRect.top - 12;
+            const availW = container.clientWidth;
+            const gap = 8;
+
+            // Tìm layout tốt nhất: ưu tiên card to nhất mà fit viewport
+            let bestCols = 4;
+            let bestCardH = 0;
+            let bestScore = -1;
+
+            for (let cols = 3; cols <= 12; cols++) {
+                const rows = Math.ceil(totalCards / cols);
+                const cardW = (availW - gap * (cols - 1)) / cols;
+                const cardH = (availH - gap * (rows - 1)) / rows;
+                // Card height = nhỏ hơn giữa chiều cao khả dụng và tỷ lệ với chiều rộng
+                const h = Math.floor(Math.min(cardH, cardW * 0.75));
+                if (h < 50) continue; // quá nhỏ
+
+                // Score = diện tích card × tỷ lệ fill viewport
+                const totalH = rows * h + gap * (rows - 1);
+                const fillRatio = totalH / availH; // càng gần 1 càng tốt
+                const score = h * cardW * (fillRatio > 1 ? 0.5 : fillRatio);
+
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestCols = cols;
+                    bestCardH = h;
+                }
+            }
+
+            bestCardH = Math.max(50, bestCardH);
+
+            container.style.gridTemplateColumns = `repeat(${bestCols}, 1fr)`;
+
+            for (const card of board) {
+                const div = document.createElement('div');
+                const stateClass = card.state === 'hidden' ? 'card-hidden' : card.state === 'flipped' ? 'flipped' : 'matched';
+                div.className = `game-card ${stateClass}`;
+                div.dataset.cardId = card.cardId;
+                div.style.height = bestCardH + 'px';
+
+                div.innerHTML = `
+                    <div class="card-inner w-full h-full">
+                        <div class="card-front border border-slate-200 bg-gradient-to-br from-emerald-50 to-sky-50 shadow-sm">
+                            <i data-lucide="help-circle" class="w-6 h-6 text-emerald-400"></i>
+                        </div>
+                        <div class="card-back border border-slate-200 bg-white shadow-sm p-2">
+                            <span class="text-sm font-semibold text-slate-800 text-center leading-tight">${card.content || ''}</span>
+                        </div>
+                    </div>
+                `;
+
+                if (card.state !== 'matched') {
+                    div.addEventListener('click', () => flipCard(card.cardId));
+                }
+
+                container.appendChild(div);
+            }
+
+            lucide.createIcons({ attrs: { 'stroke-width': 1.5 } });
+            updateMatchCount();
+        }
+
+        function updateCardUI(cardId, state, content) {
+            const el = document.querySelector(`.game-card[data-card-id="${cardId}"]`);
+            if (!el) return;
+
+            // Update board state
+            const cardData = board.find(c => c.cardId === cardId);
+            if (cardData) {
+                cardData.state = state;
+                if (content) cardData.content = content;
+            }
+
+            if (state === 'flipped') {
+                el.classList.remove('card-hidden');
+                el.classList.add('flipped');
+                const backSpan = el.querySelector('.card-back span');
+                if (backSpan && content) backSpan.textContent = content;
+            } else if (state === 'matched') {
+                el.classList.remove('card-hidden');
+                el.classList.add('flipped', 'matched');
+            } else if (state === 'hidden') {
+                el.classList.remove('flipped', 'matched');
+                el.classList.add('card-hidden');
+                const backSpan = el.querySelector('.card-back span');
+                if (backSpan) backSpan.textContent = '';
+            }
+        }
+
+        function updateMatchCount() {
+            const matched = board.filter(c => c.state === 'matched').length;
+            document.getElementById('display-matches').textContent = Math.floor(matched / 2);
+        }
+
+        // ─── Flip card ──────────────────────────────────────────
+        function flipCard(cardId) {
+            if (!socket || !teamToken) return;
+            socket.emit('flipCard', { teamToken, cardId });
+        }
+
+        // ─── Socket ─────────────────────────────────────────────
+        function connectSocket() {
+            if (socket) return;
+            socket = io();
+
+            socket.on('cardFlipped', ({ cardId, content }) => {
+                updateCardUI(cardId, 'flipped', content);
+            });
+
+            socket.on('matchResult', ({ matched, cardIds, score }) => {
+                document.getElementById('display-score').textContent = score;
+                if (matched) {
+                    for (const id of cardIds) {
+                        updateCardUI(id, 'matched');
+                    }
+                    updateMatchCount();
+                }
+            });
+
+            socket.on('cardsHidden', ({ cardIds }) => {
+                for (const id of cardIds) {
+                    updateCardUI(id, 'hidden');
+                }
+            });
+
+            socket.on('timer', ({ remainingTime }) => {
+                const mins = Math.floor(remainingTime / 60);
+                const secs = remainingTime % 60;
+                document.getElementById('display-time').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+            });
+
+            socket.on('gameStarted', () => {
+                // Refresh board khi admin start game
+                if (teamToken) socket.emit('getBoard', { teamToken });
+            });
+
+            socket.on('boardUpdate', (data) => {
+                // Handler duy nhất cho boardUpdate
+                showGameScreen(data);
+            });
+
+            socket.on('gameEnded', () => {
+                document.getElementById('game-board').classList.add('hidden');
+                document.getElementById('waiting-msg').classList.add('hidden');
+                document.getElementById('ended-msg').classList.remove('hidden');
+            });
+
+            socket.on('gameReset', () => {
+                sessionStorage.clear();
+                teamToken = null;
+                location.reload();
+            });
+
+            // Nếu auto-rejoin, request board ngay
+            if (teamToken) {
+                socket.emit('getBoard', { teamToken });
+            }
+        }
+
+        // Init icons
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons({ attrs: { 'stroke-width': 1.5 } });
+        });
+    </script>
+</body>
+</html>
