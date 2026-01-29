@@ -2,7 +2,7 @@ import express from 'express';
 import http from 'http';
 import { Server as SocketServer } from 'socket.io';
 import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 import { getDb, initSchema } from './database';
 
 // ─── Init ────────────────────────────────────────────────────────────────
@@ -155,7 +155,7 @@ app.post('/api/join', (req, res) => {
     });
   }
 
-  const token = uuidv4();
+  const token = crypto.randomUUID();
   const result = db.prepare('INSERT INTO teams (name, token, score) VALUES (?, ?, 0)').run(name, token);
   const teamId = result.lastInsertRowid as number;
 
